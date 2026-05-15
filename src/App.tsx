@@ -13,10 +13,16 @@ const stack = [
 
 const projects = [
   {
-    title: "Weather app",
+    title: "Weather app (new)",
     description: "Веб-приложение для просмотра прогноза погоды по всему миру",
     link: "https://n1nt3ch.github.io/weather-app/",
     year: "2025",
+  },
+  {
+    title: "Weather app",
+    description: "Веб-приложение для просмотра прогноза погоды по всему миру",
+    link: "https://n1nt3ch.github.io/weather-app-old/",
+    year: "2024",
   },
   // {
   //   title: "Streamline UI Kit",

@@ -1,4 +1,17 @@
 import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+type Language = {
+  code: "ru" | "en";
+  label: string;
+  flag: string;
+};
+
+const languages: Language[] = [
+  { code: "ru", label: "Русский", flag: "🇷🇺" },
+  { code: "en", label: "English", flag: "🇬🇧" },
+];
 
 const stack = [
   "React",
@@ -13,29 +26,21 @@ const stack = [
 
 const projects = [
   {
-    title: "Weather app (new)",
-    description: "Веб-приложение для просмотра прогноза погоды по всему миру",
+    titleRu: "Weather app (new)",
+    titleEn: "Weather app (new)",
+    descriptionRu: "Веб-приложение для просмотра прогноза погоды по всему миру",
+    descriptionEn: "A web app for checking weather forecasts around the world",
     link: "https://n1nt3ch.github.io/weather-app/",
     year: "2025",
   },
   {
-    title: "Weather app",
-    description: "Веб-приложение для просмотра прогноза погоды по всему миру",
+    titleRu: "Weather app",
+    titleEn: "Weather app",
+    descriptionRu: "Веб-приложение для просмотра прогноза погоды по всему миру",
+    descriptionEn: "A web app for checking weather forecasts around the world",
     link: "https://n1nt3ch.github.io/weather-app-old/",
     year: "2024",
   },
-  // {
-  //   title: "Streamline UI Kit",
-  //   description: "Набор переиспользуемых компонентов для продуктовой команды SaaS.",
-  //   link: "#",
-  //   year: "2025",
-  // },
-  // {
-  //   title: "Delivery Portal",
-  //   description: "Клиентский кабинет для трекинга заказов и онлайн-оплаты.",
-  //   link: "#",
-  //   year: "2025",
-  // },
 ];
 
 const fadeUp = {
@@ -44,6 +49,23 @@ const fadeUp = {
 };
 
 export default function App() {
+  const { t, i18n } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const currentLanguage = useMemo(() => {
+    const activeLanguage = i18n.resolvedLanguage ?? i18n.language;
+    return (
+      languages.find((language) => activeLanguage?.startsWith(language.code)) ?? languages[0]
+    );
+  }, [i18n.language, i18n.resolvedLanguage]);
+
+  const isRussian = currentLanguage.code === "ru";
+
+  const changeLanguage = async (languageCode: Language["code"]) => {
+    await i18n.changeLanguage(languageCode);
+    setIsOpen(false);
+  };
+
   return (
     <div className="bg-slate-950 text-slate-100 selection:bg-cyan-400/40">
       <div className="relative overflow-hidden">
@@ -67,22 +89,53 @@ export default function App() {
           }}
         />
 
-        <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
+        <header className="relative z-30 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
           <p className="text-base font-semibold tracking-[0.24em] text-cyan-300">ILSHAT KASIMOV</p>
           <nav className="hidden gap-8 text-sm text-slate-300 sm:flex">
+            <a className="transition hover:text-cyan-300" href="https://github.com/n1nt3ch">
+              Github
+            </a>
             <a className="transition hover:text-cyan-300" href="#about">
-              Обо мне
+              {t("about")}
             </a>
             <a className="transition hover:text-cyan-300" href="#projects">
-              Проекты
+              {t("projects")}
             </a>
             <a className="transition hover:text-cyan-300" href="#contact">
-              Контакты
+              {t("contact")}
             </a>
           </nav>
+          <div className="relative inline-block text-left">
+            <button
+              type="button"
+              onClick={() => setIsOpen((open) => !open)}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-600/80 bg-slate-800/70 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm backdrop-blur transition hover:bg-slate-700/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+            >
+              <span aria-hidden="true">{currentLanguage.flag}</span>
+              {currentLanguage.label}
+              <span className="text-xs text-slate-300">{isOpen ? "▲" : "▼"}</span>
+            </button>
+
+            {isOpen && (
+              <ul className="absolute right-0 top-full z-20 mt-2 w-full min-w-[180px] rounded-xl border border-slate-700 bg-slate-900/95 py-1 shadow-lg shadow-cyan-950/40 backdrop-blur">
+                {languages.map((language) => (
+                  <li key={language.code}>
+                    <button
+                      type="button"
+                      onClick={() => changeLanguage(language.code)}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800"
+                    >
+                      <span aria-hidden="true">{language.flag}</span>
+                      {language.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </header>
 
-        <section className="relative z-10 flex min-h-[calc(100vh-84px)] items-center px-6 pb-16 sm:px-10">
+        <section className="relative z-0 flex min-h-[calc(100vh-84px)] items-center px-6 pb-16 sm:px-10">
           <div className="mx-auto grid w-full max-w-6xl gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-end">
             <motion.div
               initial="hidden"
@@ -96,27 +149,26 @@ export default function App() {
               >
                 FRONTEND
                 <br />
-                РАЗРАБОТЧИК
+                {t("developer")}
               </motion.h1>
               <motion.h2 variants={fadeUp} className="max-w-xl text-2xl font-medium text-slate-200 sm:text-3xl">
-                Делаю аккуратные и понятные интерфейсы.
+                {t("aboutMe")}
               </motion.h2>
               <motion.p variants={fadeUp} className="max-w-lg text-base leading-relaxed text-slate-300 sm:text-lg">
-                Верстаю адаптивные сайты и интерфейсы на React, TypeScript и Tailwind. В работе делаю
-                упор на читаемый код и стабильную производительность.
+                {t("aboutMe2")}
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
                 <a
                   href="#projects"
                   className="border border-cyan-300 bg-cyan-300 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-200"
                 >
-                  Проекты
+                  {t("projects")}
                 </a>
                 <a
                   href="#contact"
                   className="border border-slate-400 px-6 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-300 hover:text-cyan-300"
                 >
-                  Связаться
+                  {t("contactBtn")}
                 </a>
               </motion.div>
             </motion.div>
@@ -132,9 +184,9 @@ export default function App() {
   role: "Frontend Developer",
   stack: ["React", "TypeScript", "Tailwind"],
   goals: [
-    "Понятный UI",
-    "Адаптивная верстка",
-    "Чистый код"
+    "Clean UI",
+    "Responsive layout",
+    "Stable performance",
   ]
 };`}
             </motion.pre>
@@ -151,11 +203,9 @@ export default function App() {
             transition={{ duration: 0.5 }}
             className="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
           >
-            Технологический стек
+            {t("techStack")}
           </motion.h3>
-          <p className="mt-4 max-w-2xl text-slate-300">
-            Основные технологии, которые использую в работе.
-          </p>
+          <p className="mt-4 max-w-2xl text-slate-300">{t("myTechnologies")}</p>
           <ul className="mt-10 grid gap-4 text-lg text-slate-200 sm:grid-cols-2 lg:grid-cols-4">
             {stack.map((item, index) => (
               <motion.li
@@ -174,14 +224,12 @@ export default function App() {
 
         <section id="projects" className="border-y border-slate-800 bg-slate-900/40">
           <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10">
-            <h3 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Проекты</h3>
-            <p className="mt-4 max-w-2xl text-slate-300">
-              Несколько примеров интерфейсов, которые есть в моем портфолио.
-            </p>
+            <h3 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">{t("projects")}</h3>
+            <p className="mt-4 max-w-2xl text-slate-300">{t("projectsDescription")}</p>
             <div className="mt-12 space-y-2">
               {projects.map((project, index) => (
                 <motion.a
-                  key={project.title}
+                  key={project.link}
                   href={project.link}
                   initial={{ opacity: 0, y: 28 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -190,10 +238,14 @@ export default function App() {
                   className="group block border border-slate-800 px-6 py-6 transition hover:border-cyan-300/70 hover:bg-slate-900"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h4 className="text-xl font-medium text-white">{project.title}</h4>
+                    <h4 className="text-xl font-medium text-white">
+                      {isRussian ? project.titleRu : project.titleEn}
+                    </h4>
                     <span className="text-sm text-cyan-300">{project.year}</span>
                   </div>
-                  <p className="mt-3 max-w-3xl text-slate-300">{project.description}</p>
+                  <p className="mt-3 max-w-3xl text-slate-300">
+                    {isRussian ? project.descriptionRu : project.descriptionEn}
+                  </p>
                 </motion.a>
               ))}
             </div>
@@ -201,10 +253,8 @@ export default function App() {
         </section>
 
         <section id="contact" className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10">
-          <h3 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Связаться</h3>
-          <p className="mt-4 max-w-xl text-slate-300">
-            Если вам нужен frontend разработчик, напишите в Telegram или на почту.
-          </p>
+          <h3 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">{t("contactBtn")}</h3>
+          <p className="mt-4 max-w-xl text-slate-300">{t("contactFooter")}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <a
               href="mailto:ilshat.kasimov1@gmail.com"
